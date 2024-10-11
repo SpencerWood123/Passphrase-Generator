@@ -1,0 +1,88 @@
+import random
+
+def load_word_list(file_path):
+    word_list = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            split_line = line.strip().split(maxsplit=1)
+            if len(split_line) == 2:  
+                dice_rolls, word = split_line
+                word_list[dice_rolls] = word
+    return word_list
+
+def generate_dice_roll():
+    return ''.join(str(random.randint(1, 6)) for _ in range(5))
+
+def generate_passphrase(word_list, num_words=6):
+    return [word_list[generate_dice_roll()] for _ in range(num_words)]
+
+def display_passphrase(passphrase):
+    print("Current Passphrase: " + ' '.join(passphrase))
+
+def add_word(passphrase, word_list):
+    position = int(input("Enter position to add a new word (1-based index): ")) - 1
+    passphrase.insert(position, word_list[generate_dice_roll()])
+
+def remove_word(passphrase):
+    position = int(input("Enter position to remove a word (1-based index): ")) - 1
+    passphrase.pop(position)
+
+def capitalize_word(word):
+    return word.capitalize()
+
+def substitute_characters(word):
+    substitutions = {'s': '$', 'e': '3', 'o': '0'}
+    for original, replacement in substitutions.items():
+        word = word.replace(original, replacement)
+    return word
+
+def add_number(word):
+    return word + str(random.randint(0, 9))
+
+def alter_word(passphrase):
+    position = int(input("Enter the position of the word to alter (1-based index): ")) - 1
+    word = passphrase[position]
+    print("1. Capitalize\n2. Substitute Characters\n3. Add a Number")
+    choice = input("Choose an alteration: ")
+
+    if choice == '1':
+        passphrase[position] = capitalize_word(word)
+    elif choice == '2':
+        passphrase[position] = substitute_characters(word)
+    elif choice == '3':
+        passphrase[position] = add_number(word)
+
+def revert_word(passphrase, original_words):
+    position = int(input("Enter the position of the word to revert (1-based index): ")) - 1
+    passphrase[position] = original_words[position]
+
+def user_interface():
+    word_list = load_word_list('diceware.wordlist.asc.txt')
+    passphrase = generate_passphrase(word_list)
+    original_words = passphrase.copy()
+
+    display_passphrase(passphrase)
+
+    while True:
+        print("Options:")
+        print("1. Add a word")
+        print("2. Remove a word")
+        print("3. Alter a word")
+        print("4. Revert a word")
+        print("5. Exit")
+        choice = input("Choose an option: ")
+
+        if choice == '1':
+            add_word(passphrase, word_list)
+        elif choice == '2':
+            remove_word(passphrase)
+        elif choice == '3':
+            alter_word(passphrase)
+        elif choice == '4':
+            revert_word(passphrase, original_words)
+        elif choice == '5':
+            break
+
+        display_passphrase(passphrase)
+
+user_interface()
